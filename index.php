@@ -88,6 +88,56 @@ if(isset($_POST['decrypt_abc'])){
     $textDecrypt = $cryptClass->decrypt($textRaw, $abcCrypt, $abcRaw);
 }
 
+function uploadImg($elem)
+{
+    $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+    $stateImg = false;
+    if (isset($_FILES[$elem]) && $_FILES[$elem]['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES[$elem]['tmp_name'];
+        $fileName = $_FILES[$elem]['name'];
+        $fileSize = $_FILES[$elem]['size'];
+        $fileType = $_FILES[$elem]['type'];
+        $fileNameCmps = explode(".", $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+        $dest_path = '';
+        $allowedfileExtensions = array('jpg', 'jpeg', 'png');
+        $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
+
+        if (in_array($fileExtension, $allowedfileExtensions)) {
+
+            $uploadFileDir = './img/';
+            $dest_path = $uploadFileDir . $newFileName;
+
+            if(move_uploaded_file($fileTmpPath, $dest_path))
+            {
+                $stateImg = true;
+            }
+        }
+        $urlImg = $stateImg ? $actual_link .'img/'.$newFileName: '';
+        return ["url" => $urlImg, "name" => $newFileName];
+    }
+    return ["url" => '', "name" => ''];
+}
+
+if(isset($_POST['crypt_image_button'])){
+    $abcCrypt = @$_POST['abc_crypt'];
+    $abcRaw = @$_POST['abc_raw'];
+    $textRawImage = @$_POST['text_raw_image'];
+    $imgArr = uploadImg('raw_image');
+    $stego = new StreamSteganography('./img/'.$imgArr['name']);
+    $stego->Write($textRawImage);
+    $urlImg = $imgArr['url'];
+}
+
+if(isset($_POST['decrypt_image_button'])){
+    $abcCrypt = @$_POST['abc_crypt'];
+    $abcRaw = @$_POST['abc_raw'];
+    $textRawImage = @$_POST['text_raw_image'];
+    $imgArr = uploadImg('crypt_image');
+    $stego = new StreamSteganography('./img/'.$imgArr['name']);
+    $urlImg = $imgArr['url'];
+    $textCryptImage = $stego->Read();
+}
 
 ?>
 
@@ -428,16 +478,14 @@ if(isset($_POST['decrypt_abc'])){
                     <div class="column ">
                         <label class="label">Imagen con texto encriptado</label>
                         <div class="field has-addons is-grouped is-grouped-centered">
-                            <figure class="image is-4by3">
-                                <img src="https://bulma.io/images/placeholders/256x256.png">
-                            </figure>
+                            <img class="" src="<?php echo @$urlImg; ?>">
                         </div>
                     </div>
                     <div class="column ">
                         <label class="label">Texto de la imagen desencriptado</label>
                         <div class="field has-addons is-grouped is-grouped-centered">
                             <div class="box">
-
+                                <?php echo @$textCryptImage; ?>
                             </div>
                         </div>
                     </div>
