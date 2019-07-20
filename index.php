@@ -110,6 +110,7 @@ function uploadImg($elem)
 
             if(move_uploaded_file($fileTmpPath, $dest_path))
             {
+                chmod($dest_path, 0777);
                 $stateImg = true;
             }
         }
