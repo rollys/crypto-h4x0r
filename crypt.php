@@ -167,15 +167,19 @@ class CrytpHaxor {
 
     public function encrypt($text, $abcCrypt, $abcRaw)
     {
+        //var_dump($text);
         $textArr = str_split(strtolower(trim($text)));
+        //var_dump($textArr);
         $textEncrypt = '';
         foreach ($textArr as $k => $val){
-            if(!empty($val)){
+            if(!empty($val) && $val != ' '){
+                //var_dump($val);
                 $textEncrypt .= $this->_getLetterCryptByLetterRaw($val, $this->_getABCCryptAndRaw($abcCrypt, $abcRaw));
             }else{
                 $textEncrypt .= ' ';
             }
         }
+        //exit;
         return $textEncrypt;
     }
 
@@ -184,7 +188,7 @@ class CrytpHaxor {
         $textArr = str_split(strtolower(trim($text)));
         $textEncrypt = '';
         foreach ($textArr as $k => $val){
-            if(!empty($val)){
+            if(!empty($val) && $val != ' '){
                 $textEncrypt .= $this->_getLetterRawByLetterCrypt($val, $this->_getABCCryptAndRaw($abcCrypt, $abcRaw));
             }else{
                 $textEncrypt .= ' ';
