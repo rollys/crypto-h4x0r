@@ -11,7 +11,7 @@ class StreamSteganography
 		if ( !is_file( $img_path ) )
 		{
 			if ( is_writable($img_path) )
-				die("\nThe image path is not writable");
+				die("\nThe image path is not writable or you upload a image");
 			$this->img_object = imagecreatetruecolor($w,$h);
 			imagepng($this->img_object, $img_path  ); 			
 		}

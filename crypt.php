@@ -1,7 +1,9 @@
 <?php 
 
-class CrytpHaxor {
+class CryptHaxor {
 
+    CONST DIRECTION_LETTER_LEFT = 'i';
+    CONST DIRECTION_LETTER_RIGHT = 'd';
     public $abc = 'abcdefghijklmnopqrstuvwxyz';
 
     public function getABCArray($abc)
@@ -11,97 +13,65 @@ class CrytpHaxor {
 
     public function getAllKeyArray($key, $abcLength)
     {
-        $key = str_replace('0', '', $key);
-        $keyArr = str_split($key);
+        //$key = str_replace('0', '', $key);
+        $keyArr = str_split((int)$key);
         return $this->_completeArray($keyArr, $abcLength);
     }
 
-    public function getAllIdiArray($idi, $abcArr)
+    public function getAllDirectionArray($direction, $abcLength)
     {
+        $abcArr = $this->getABCArray($this->abc);
         $abcArrFilter = array_merge($abcArr, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '?', '#', '$', '%', '/', '"', '\'', '&', '@']);
-        $abcWithOutID = array_filter(str_replace(['i','d'], '', $abcArrFilter));
-        $idi = str_replace($abcWithOutID, '', $idi);
-        $idiArr = str_split($idi);
-        return $this->_completeArray($idiArr, count($abcArr));
+        $abcWithOutID = array_filter(str_replace([$this::DIRECTION_LETTER_LEFT, $this::DIRECTION_LETTER_RIGHT], '', $abcArrFilter));
+        $direction = str_replace($abcWithOutID, '', $direction);
+        //if(empty($direction)) throw new Exception('Empty directions');
+        $directionArr = str_split($direction);
+        return $this->_completeArray($directionArr, $abcLength);
     }
 
-    public function idiProcess($abcArr, $key, $idi)
+    public function idiProcess($abc, $key, $idi)
     {
-        $keyArr = $this->getAllKeyArray($key, count($abcArr));
-        $idiArr = $this->getAllIdiArray($idi, $abcArr);
-        //var_dump($idiArr);exit;
+        //$abcObj = new \stdClass();
+        /*
+        $a = ["a"=>'o'];
+        var_dump($a);
+        var_dump((object)$a);
+        $c = json_encode($a);
+        $d = json_decode($c);
+        var_dump($d);exit;
+        */
+        $keyArr = $this->getAllKeyArray($key, strlen($abc));
+        $directionArr = $this->getAllDirectionArray($idi, strlen($abc));
+        //var_dump($keyArr);
+        //var_dump($directionArr);
+        $abcArr = $this->getABCArray($abc);
         $abcIdi = [];
-        $pos = 0;
-        foreach ($keyArr as $k => $num){
-            $valIdi = trim(strtolower($idiArr[$k]));
-            $directionNum = $num*1;
-            if($valIdi === 'i'){
-                $directionNum = $num*-1;
-            }
+        foreach ($abcArr as $k => $val){
+            //$seed = $k!=0? ((int)$keyArr[$k])-1:$keyArr[$k];
+            $seed = $keyArr[$k];
+            $abc = $this->getABCArray($this->cesarEncode($abc, $this->_getNumberDirection($seed, $directionArr[$k])*-1));
+            //var_dump($abc);//exit;
+            /*$abcIdi[] = $abc[0];
+            array_shift($abc);*/
 
-            $calPos = $pos + $directionNum;
-
-            if($calPos<0){
-                $initPos = 25;
-                $haveLetter = false;
-                $countPos = 0;
-                while (!$haveLetter) {
-                    if(!in_array($abcArr[$initPos], $abcIdi)){
-                        $countPos++;
-                    }
-                    if($countPos == abs($calPos)){
-                        $abcIdi[] = $abcArr[$initPos];
-                        $pos = array_search($abcArr[$initPos], $abcArr);
-                        $haveLetter = true;
-                    }
-                    $initPos--;
-                }
-
-            }elseif($calPos>25){
-                $initPos = 0;
-                $haveLetter = false;
-                $countPos = 0;
-                while (!$haveLetter) {
-                    if(!in_array($abcArr[$initPos], $abcIdi)){
-                        $countPos++;
-                    }
-                    if($countPos == abs($calPos)){
-                        $abcIdi[] = $abcArr[$initPos];
-                        $pos = array_search($abcArr[$initPos], $abcArr);
-                        $haveLetter = true;
-                    }
-                    $initPos++;
-                }
+            if($k == 0){
+                $abcIdi[] = $abc[0];
+                array_shift($abc);
             }else{
-
-                $initPos = $pos;
-                $haveLetter = false;
-                $countPos = 0;
-                while (!$haveLetter) {
-                    if(!in_array($abcArr[$initPos], $abcIdi)){
-                        $countPos++;
-                    }
-                    if($countPos == abs($calPos)){
-                        $abcIdi[] = $abcArr[$initPos];
-                        $pos = array_search($abcArr[$initPos], $abcArr);
-                        $haveLetter = true;
-                    }
-                    if($directionNum<0){
-                        $initPos--;
-                    }else{
-                        $initPos++;
-                    }
-                }
+                $abcIdi[] = $abc[count($abc)-1];
+                $abc = array_slice($abc,0,-1);
             }
-
-
-
+            var_dump($abc);
+            //if($k == 5) exit;
         }
-
+        var_dump($abcIdi);exit;
         return $abcIdi;
-
     }
 
+
+
+
+    //
     public function tramasEncode($abc, $key)
     {
         $abcStringArr = str_split($abc);
@@ -116,18 +86,14 @@ class CrytpHaxor {
                 $abcKeyArr[] = $val;
             }
         }
-        //var_dump($abcKeyArr);
         ksort($abcKeyArr);
-        //var_dump($abcKeyArr);
         return implode($abcKeyArr);
     }
-
 
     public function transpositionEncode($abcArr, $key)
     {
         $keyArr = str_split($key);
         $abcChunkArr = array_chunk($abcArr, count($keyArr));
-        //var_dump($abcChunkArr);
         $abcTransposition = [];
         $abcTranspositionString = '';
         foreach ($abcChunkArr as $k => $val){
@@ -137,12 +103,16 @@ class CrytpHaxor {
             $abcTransposition[] = $arr;
             $abcTranspositionString .= implode($arr);
         }
-        //var_dump($abcTransposition);
         return $abcTranspositionString;
     }
 
-    public function cesarEncode($abcArr, $seed)
+    public function cesarEncode($abc, $seed)
     {
+        $abcArr = $abc;
+        if (!is_array($abc)){
+            $abcArr  = $this->getABCArray($abc);
+        }
+
         if($seed<0){
             $seed = (abs($seed) % count($abcArr))*-1;
         }else{
@@ -151,50 +121,64 @@ class CrytpHaxor {
         $abcCesarArr = [];
         foreach ($abcArr as $k => $val){
             $calPos = $k+(int)$seed;
-            $key = $calPos;
             if($calPos>25){
                 $calPos = ($calPos % 25)-1;
             }
             if($calPos<0){
-                $calPos = 25 + $calPos +1;
+                $calPos = 25 + $calPos + 1;
             }
             $abcCesarArr[$calPos] = $val;
         }
         ksort($abcCesarArr);
-        // var_dump($abcCesarArr);exit;
         return implode($abcCesarArr);
     }
 
-    public function encrypt($text, $abcCrypt, $abcRaw)
+    public function encrypt($text, $abcCrypt, $abcRaw, $key = '0', $direction = 'i')
     {
-        //var_dump($text);
-        $textArr = str_split(strtolower(trim($text)));
-        //var_dump($textArr);
+        $textArr = str_split(strtolower($text));
+        $textWithoutSpace = str_replace(' ', '', trim($text));
         $textEncrypt = '';
+        $keyArr = $this->getAllKeyArray($key, strlen($textWithoutSpace));
+        $directionArr = $this->getAllDirectionArray($direction, strlen($textWithoutSpace));
+        $currentIndex = 0;
         foreach ($textArr as $k => $val){
             if(!empty($val) && $val != ' '){
-                //var_dump($val);
+                $abcRaw = $this->cesarEncode($abcRaw,
+                    $this->_getNumberDirection($keyArr[$currentIndex], $directionArr[$currentIndex]));
                 $textEncrypt .= $this->_getLetterCryptByLetterRaw($val, $this->_getABCCryptAndRaw($abcCrypt, $abcRaw));
+                $currentIndex++;
             }else{
                 $textEncrypt .= ' ';
             }
         }
-        //exit;
         return $textEncrypt;
     }
 
-    public function decrypt($text, $abcCrypt, $abcRaw)
+    public function decrypt($text, $abcCrypt, $abcRaw, $key = '0', $direction = 'i')
     {
         $textArr = str_split(strtolower(trim($text)));
-        $textEncrypt = '';
+        $textWithoutSpace = str_replace(' ', '', trim($text));
+        $textDecrypt = '';
+        $keyArr = $this->getAllKeyArray($key, strlen($textWithoutSpace));
+        $directionArr = $this->getAllDirectionArray($direction, strlen($textWithoutSpace));
+        $currentIndex = 0;
         foreach ($textArr as $k => $val){
             if(!empty($val) && $val != ' '){
-                $textEncrypt .= $this->_getLetterRawByLetterCrypt($val, $this->_getABCCryptAndRaw($abcCrypt, $abcRaw));
+                $abcCrypt = $this->cesarEncode($abcCrypt,
+                    -1*$this->_getNumberDirection($keyArr[$currentIndex], $directionArr[$currentIndex]));
+                $textDecrypt .= $this->_getLetterRawByLetterCrypt($val, $this->_getABCCryptAndRaw($abcCrypt, $abcRaw));
+                $currentIndex++;
             }else{
-                $textEncrypt .= ' ';
+                $textDecrypt .= ' ';
             }
         }
-        return $textEncrypt;
+        return $textDecrypt;
+    }
+
+    protected function _getNumberDirection($number, $letterDirection)
+    {
+        $number = (int)$number;
+        return $letterDirection == $this::DIRECTION_LETTER_LEFT ? $number*-1:$number;
     }
 
     protected function _getABCCryptAndRaw($abcCrypt, $abcRaw)
@@ -214,8 +198,6 @@ class CrytpHaxor {
     {
         return $abcCryptAndRawArr[$letterCrypt];
     }
-
-
 
     protected function _completeArray($value, $length)
     {
@@ -237,9 +219,5 @@ class CrytpHaxor {
 }
 
 
-//$d = new CrytpHaxor();
-
-// var_dump( $d->idiProcess($d->getABCArray(),'80453', 'ids3i'), true);
-//var_dump( $d->tramasProcess($d->abc,'4231'));
-//var_dump( $d->transpositionEncode($d->getABCArray($abc),'4231'));
-// var_dump( $d->cesarEncode($d->getABCArray($abc),'-53'));
+//$d = new CryptHaxor();
+//$d->idiProcess($d->abc,'312', 'idi'); //should be result: xyvstr...
