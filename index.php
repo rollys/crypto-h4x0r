@@ -221,7 +221,7 @@ require 'main.php';
                     <label for="raw_trama_key" class="label">ABCDARIO Crypto</label>
                     <div class="field">
                         <div class="control">
-                            <input class="input is-danger" type="text" name="abc_crypt" value="<?php echo @$abcCrypt; ?>" placeholder="" disableed>
+                            <input class="input is-danger is-uppercase" type="text" name="abc_crypt" value="<?php echo @$abcCrypt; ?>" placeholder="" disableed>
                         </div>
                     </div>
                 </div>
@@ -229,7 +229,7 @@ require 'main.php';
                     <label for="raw_trama_key" class="label">ABCDARIO Llano</label>
                     <div class="field">
                         <div class="control">
-                            <input class="input is-danger" type="text" name="abc_raw" value="<?php echo @$abcRaw; ?>" placeholder="" disableed>
+                            <input class="input is-danger is-uppercase" type="text" name="abc_raw" value="<?php echo @$abcRaw; ?>" placeholder="" disableed>
                         </div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@ require 'main.php';
                             </div>
                             <div class="control">
                                 <input
-                                        class="input"
+                                        class="input is-uppercase"
                                         type="text"
                                         placeholder="IDI"
                                         name="dont_repeat_idi"

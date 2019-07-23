@@ -135,6 +135,8 @@ class CryptHaxor {
 
     public function encrypt($text, $abcCrypt, $abcRaw, $key = '0', $direction = 'i')
     {
+        $abcCrypt = strtolower($abcCrypt);
+        $abcRaw = strtolower($abcRaw);
         $textArr = str_split(strtolower($text));
         $textWithoutSpace = str_replace(' ', '', trim($text));
         $textEncrypt = '';
@@ -156,6 +158,8 @@ class CryptHaxor {
 
     public function decrypt($text, $abcCrypt, $abcRaw, $key = '0', $direction = 'i')
     {
+        $abcCrypt = strtolower($abcCrypt);
+        $abcRaw = strtolower($abcRaw);
         $textArr = str_split(strtolower(trim($text)));
         $textWithoutSpace = str_replace(' ', '', trim($text));
         $textDecrypt = '';
