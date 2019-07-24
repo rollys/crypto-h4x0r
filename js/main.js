@@ -6,7 +6,7 @@ function previewFile(elemName, elemPreview, elemNamePreview) {
     let reader  = new FileReader();
 
     reader.addEventListener("load", function () {
-        preview.src = reader.result;
+        // preview.src = reader.result; // TODO: uncomment to view image
     }, false);
 
     if (file) {

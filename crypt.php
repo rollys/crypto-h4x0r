@@ -29,6 +29,7 @@ class CryptHaxor {
         return $this->_completeArray($directionArr, $abcLength);
     }
 
+    // TODO: finish the functionality
     public function idiProcess($abc, $key, $idi)
     {
         //$abcObj = new \stdClass();
